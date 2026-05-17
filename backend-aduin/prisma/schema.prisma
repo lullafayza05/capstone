@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql" 
+  url      = env("DATABASE_URL")
+}
+
+// Enum StatusLaporan DIHAPUS agar status bisa disinkronkan dengan teks Frontend
+enum Role {
+  MASYARAKAT
+  ADMIN
+}
+
+model User {
+  id        String      @id @default(uuid())
+  username  String      @unique
+  nama      String
+  email     String      @unique
+  password  String
+  telepon   String?
+  role      Role        @default(MASYARAKAT)
+  laporan   Pengaduan[] 
+  
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model Pengaduan {
+  id          String        @id @default(uuid())
+  judul       String
+  deskripsi   String        @db.Text
+  kategori    String
+  alamat      String
+  foto        String?       
+  
+  // PERUBAHAN: Status menjadi tipe teks (String) dan penambahan kolom catatan tanggapan
+  status      String        @default("Belum diterima")
+  catatan     String?       @db.Text 
+  
+  userId      String
+  pelapor     User          @relation(fields: [userId], references: [id])
+  
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
